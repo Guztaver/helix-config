@@ -11,6 +11,9 @@ default-yank-register = "+"
 line-number = "relative"
 cursorline = true
 
+[editor.soft-wrap]
+enable = true
+
 [editor.lsp]
 enable = true
 auto-signature-help = true
