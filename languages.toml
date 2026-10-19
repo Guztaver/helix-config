@@ -17,3 +17,19 @@ parameterNames.enabled = "all"
 name = "toml"
 language-servers = ["taplo"]
 auto-format = true
+
+[[language]]
+name = "lua"
+language-servers = ["lua-language-server"]
+
+[language-server.lua-language-server]
+command = "C:/Users/Gustavo/scoop/shims/lua-language-server.exe"
+
+[language-server.lua-language-server.config.Lua]
+runtime.version = "Lua 5.4"
+workspace.checkThirdParty = false
+workspace.library = [
+  "C:/Users/Gustavo/.config/wezterm/wezterm-types/lua",
+  "C:/Users/Gustavo/.config/wezterm/wezterm-session-manager",
+]
+completion.enable = true
