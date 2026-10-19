@@ -1,0 +1,297 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Helix Editor languages.toml",
+  "description": "Schema para linguagens, language servers, formatters, grammars e debuggers do Helix Editor. Baseado na documentação oficial atual do Helix.",
+  "type": "object",
+  "properties": {
+    "use-grammars": {
+      "$ref": "#/definitions/use-grammars"
+    },
+    "language-server": {
+      "type": "object",
+      "description": "Mapa de nomes de language servers. Os nomes são escolhidos pelo usuário, por exemplo jdtls ou taplo.",
+      "additionalProperties": { "$ref": "#/definitions/language-server" }
+    },
+    "language": {
+      "type": "array",
+      "description": "Lista de blocos [[language]].",
+      "items": { "$ref": "#/definitions/language" }
+    },
+    "grammar": {
+      "type": "array",
+      "description": "Lista de blocos [[grammar]].",
+      "items": { "$ref": "#/definitions/grammar" }
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "string-array": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "use-grammars": {
+      "type": "object",
+      "properties": {
+        "only": { "$ref": "#/definitions/string-array" },
+        "except": { "$ref": "#/definitions/string-array" }
+      },
+      "additionalProperties": false
+    },
+    "glob": {
+      "type": "object",
+      "properties": {
+        "glob": {
+          "type": "string",
+          "description": "Glob Unix-style; use / também no Windows, como recomenda a documentação do Helix."
+        }
+      },
+      "required": ["glob"],
+      "additionalProperties": false
+    },
+    "file-type": {
+      "description": "Extensão simples ou tabela { glob = ... }.",
+      "anyOf": [
+        { "type": "string" },
+        { "$ref": "#/definitions/glob" }
+      ]
+    },
+    "indent": {
+      "type": "object",
+      "properties": {
+        "tab-width": { "type": "integer", "minimum": 1, "description": "Número de espaços visuais por tabulação." },
+        "unit": { "type": "string", "minLength": 1, "description": "Texto inserido ao indentar; normalmente espaços ou \\t." }
+      },
+      "required": ["tab-width", "unit"],
+      "additionalProperties": false
+    },
+    "comment-tokens": {
+      "anyOf": [
+        { "type": "string" },
+        { "$ref": "#/definitions/string-array" }
+      ]
+    },
+    "block-comment-pair": {
+      "type": "object",
+      "properties": {
+        "start": { "type": "string" },
+        "end": { "type": "string" }
+      },
+      "required": ["start", "end"],
+      "additionalProperties": false
+    },
+    "block-comment-tokens": {
+      "description": "Par de marcadores de comentário de bloco, em formato de tabela ou lista de tabelas.",
+      "anyOf": [
+        { "$ref": "#/definitions/block-comment-pair" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/definitions/block-comment-pair" }
+        }
+      ]
+    },
+    "formatter": {
+      "type": "object",
+      "properties": {
+        "command": { "type": "string", "description": "Executável que lê o arquivo por stdin e escreve o resultado por stdout." },
+        "args": {
+          "type": "array",
+          "items": { "type": "string", "description": "Pode usar %{buffer_name} para o caminho do buffer atual." }
+        }
+      },
+      "required": ["command"],
+      "additionalProperties": false
+    },
+    "soft-wrap": {
+      "type": "object",
+      "properties": {
+        "enable": { "type": "boolean" },
+        "max-wrap": { "type": "integer", "minimum": 0 },
+        "max-indent-retain": { "type": "integer", "minimum": 0 },
+        "wrap-indicator": { "type": "string" },
+        "wrap-at-text-width": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "word-completion": {
+      "type": "object",
+      "properties": {
+        "enable": { "type": "boolean" },
+        "trigger-length": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "auto-pairs": {
+      "type": "object",
+      "description": "Tabela de pares de caracteres para esta linguagem.",
+      "additionalProperties": { "type": "string", "minLength": 1, "maxLength": 1 }
+    },
+    "language-server-selection": {
+      "description": "Nome do servidor ou objeto que limita os recursos desse servidor.",
+      "anyOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "only-features": { "$ref": "#/definitions/lsp-features" },
+            "except-features": { "$ref": "#/definitions/lsp-features" }
+          },
+          "required": ["name"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "lsp-features": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["diagnostics", "code-action", "completion", "document-symbols", "workspace-symbols", "goto-definition", "goto-declaration", "goto-type-definition", "goto-implementation", "goto-reference", "rename", "format", "signature-help", "inlay-hints", "document-highlight", "folding-range", "selection-range", "code-lens", "document-link", "color-provider"]
+      }
+    },
+    "lsp-config-value": {
+      "description": "Opção de inicialização do servidor; a estrutura interna é específica de cada LSP.",
+      "anyOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "array", "items": { "$ref": "#/definitions/lsp-config-value" } },
+        { "type": "object", "additionalProperties": { "$ref": "#/definitions/lsp-config-value" } }
+      ]
+    },
+    "language-server": {
+      "type": "object",
+      "properties": {
+        "command": { "type": "string", "description": "Nome ou caminho do executável do language server." },
+        "args": { "$ref": "#/definitions/string-array" },
+        "config": { "type": "object", "additionalProperties": { "$ref": "#/definitions/lsp-config-value" }, "description": "Initialization options enviados ao LSP; a forma exata depende do servidor." },
+        "timeout": { "type": "integer", "minimum": 0, "description": "Tempo máximo de uma requisição LSP, em segundos." },
+        "environment": { "type": "object", "additionalProperties": { "type": "string" }, "description": "Variáveis de ambiente usadas ao iniciar o servidor." },
+        "required-root-patterns": { "$ref": "#/definitions/string-array", "description": "Globs; o servidor só inicia se pelo menos um for encontrado." }
+      },
+      "required": ["command"],
+      "additionalProperties": false
+    },
+    "completion-item": {
+      "description": "Entrada de completion para um template de debugger.",
+      "anyOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "completion": { "type": "string", "enum": ["filename", "directory", "pid", "ignored"] },
+            "default": { "type": "string" },
+            "fill": { "type": "string" }
+          },
+          "required": ["name"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "debugger-template-arg": {
+      "description": "Valor DAP arbitrário; {0}, {1}, etc. referenciam entradas de completion.",
+      "anyOf": [
+        { "type": "string" },
+        { "type": "number" },
+        { "type": "boolean" },
+        { "type": "array", "items": { "$ref": "#/definitions/debugger-template-arg" } },
+        { "type": "object", "additionalProperties": { "$ref": "#/definitions/debugger-template-arg" } }
+      ]
+    },
+    "debugger-template": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "request": { "type": "string", "enum": ["launch", "attach"] },
+        "completion": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/completion-item" }
+        },
+        "args": { "type": "object", "additionalProperties": { "$ref": "#/definitions/debugger-template-arg" } }
+      },
+      "required": ["name", "request"],
+      "additionalProperties": false
+    },
+    "debugger": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Nome do debug adapter." },
+        "transport": { "type": "string", "enum": ["stdio", "tcp"] },
+        "command": { "type": "string" },
+        "args": { "$ref": "#/definitions/string-array" },
+        "port-arg": { "type": "string", "description": "Argumento usado para inserir a porta quando o transporte é tcp; normalmente contém {}." },
+        "templates": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/debugger-template" }
+        }
+      },
+      "required": ["name", "transport"],
+      "additionalProperties": false
+    },
+    "language": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Nome da linguagem usado pelo Helix." },
+        "language-id": { "type": "string", "description": "language-id enviado em TextDocumentItem ao LSP." },
+        "scope": { "type": "string", "description": "Escopo tree-sitter/TextMate, normalmente source.<nome> ou text.<nome>." },
+        "injection-regex": { "type": "string" },
+        "file-types": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/file-type" }
+        },
+        "shebangs": { "$ref": "#/definitions/string-array" },
+        "roots": { "$ref": "#/definitions/string-array" },
+        "auto-format": { "type": "boolean" },
+        "diagnostic-severity": { "type": "string", "enum": ["error", "warning", "info", "hint"] },
+        "comment-tokens": { "$ref": "#/definitions/comment-tokens" },
+        "comment-token": { "type": "string", "description": "Nome antigo aceito por compatibilidade; prefira comment-tokens." },
+        "block-comment-tokens": { "$ref": "#/definitions/block-comment-tokens" },
+        "indent": { "$ref": "#/definitions/indent" },
+        "language-servers": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/language-server-selection" }
+        },
+        "grammar": { "type": "string" },
+        "formatter": { "$ref": "#/definitions/formatter" },
+        "soft-wrap": { "$ref": "#/definitions/soft-wrap" },
+        "text-width": { "type": "integer", "minimum": 0 },
+        "rulers": { "type": "array", "items": { "type": "integer", "minimum": 0 } },
+        "path-completion": { "type": "boolean" },
+        "word-completion": { "$ref": "#/definitions/word-completion" },
+        "workspace-lsp-roots": { "$ref": "#/definitions/string-array" },
+        "persistent-diagnostic-sources": { "$ref": "#/definitions/string-array" },
+        "rainbow-brackets": { "type": "boolean" },
+        "code-actions-on-save": { "$ref": "#/definitions/string-array" },
+        "auto-pairs": { "$ref": "#/definitions/auto-pairs" },
+        "debugger": { "$ref": "#/definitions/debugger" }
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    },
+    "grammar-source": {
+      "description": "Fonte de uma grammar tree-sitter.",
+      "anyOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "properties": {
+            "git": { "type": "string", "format": "uri" },
+            "rev": { "type": "string" },
+            "path": { "type": "string" },
+            "subpath": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "grammar": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "source": { "$ref": "#/definitions/grammar-source" }
+      },
+      "required": ["name", "source"],
+      "additionalProperties": false
+    }
+  }
+}

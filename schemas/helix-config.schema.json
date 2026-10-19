@@ -1,0 +1,444 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Helix Editor config.toml",
+  "description": "Schema para a configuração global ou local do Helix Editor. Baseado na documentação oficial atual do Helix.",
+  "type": "object",
+  "properties": {
+    "theme": {
+      "type": "string",
+      "description": "Nome do tema do Helix. O tema precisa existir na instalação atual."
+    },
+    "editor": {
+      "$ref": "#/definitions/editor"
+    },
+    "keys": {
+      "$ref": "#/definitions/keys"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "severity": {
+      "type": "string",
+      "enum": ["error", "warning", "info", "hint"],
+      "description": "Severidade mínima ou lista de severidades exibidas pelo Helix."
+    },
+    "severity-or-disable": {
+      "type": "string",
+      "enum": ["error", "warning", "info", "hint", "disable"]
+    },
+    "string-array": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "key-binding": {
+      "description": "Comando, sequência de comandos ou mapa aninhado de teclas.",
+      "anyOf": [
+        { "$ref": "#/definitions/command-name" },
+        {
+          "type": "array",
+          "items": { "$ref": "#/definitions/key-binding" }
+        },
+        {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/key-binding" }
+        }
+      ]
+    },
+    "command-name": {
+      "type": "string",
+      "description": "Nome de um comando do Helix; também aceita comandos futuros ou personalizados.",
+      "anyOf": [
+        {
+          "enum": [
+            "no_op", "normal_mode", "insert_mode", "select_mode", "exit_select_mode",
+            "completion", "hover", "format_selections", "code_action", "rename_symbol",
+            "goto_definition", "goto_declaration", "goto_type_definition", "goto_implementation",
+            "goto_reference", "lsp_or_syntax_symbol_picker", "lsp_or_syntax_workspace_symbol_picker",
+            "diagnostics_picker", "workspace_diagnostics_picker", "file_picker", "file_explorer",
+            "buffer_picker", "jumplist_picker", "global_search", "command_palette", "last_picker",
+            "save_selection", "write", "write_all", "quit", "quit_all", "force_quit",
+            "undo", "redo", "earlier", "later", "yank", "yank_to_clipboard", "paste_after",
+            "paste_before", "delete_selection", "change_selection", "indent", "unindent",
+            "toggle_comments", "toggle_line_comments", "toggle_block_comments", "select_all",
+            "extend_line", "extend_line_below", "goto_line_start", "goto_line_end",
+            "goto_file_start", "goto_last_line", "move_char_left", "move_char_right",
+            "move_visual_line_up", "move_visual_line_down", "move_line_up", "move_line_down",
+            "page_up", "page_down", "scroll_up", "scroll_down", "jump_forward", "jump_backward",
+            "search", "rsearch", "search_next", "search_prev", "search_selection",
+            "search_selection_detect_word_boundaries", "shell_command", "shell_pipe",
+            "shell_insert_output", "shell_append_output", "open_below", "open_above",
+            "smart_tab", "insert_tab", "commit_undo_checkpoint", "record_macro", "replay_macro",
+            "vsplit", "hsplit", "rotate_view", "transpose_view", "jump_view_left",
+            "jump_view_right", "jump_view_up", "jump_view_down", "wclose", "wonly",
+            "swap_view_left", "swap_view_right", "swap_view_up", "swap_view_down",
+            "dap_launch", "dap_continue", "dap_next", "dap_step_in", "dap_step_out",
+            "dap_toggle_breakpoint", "dap_toggle_breakpoint_condition", "dap_debugger_picker"
+          ]
+        },
+        { "type": "string" }
+      ]
+    },
+    "key-map": {
+      "type": "object",
+      "description": "Mapa de teclas. As chaves são nomes como ctrl-s, space-f, S-tab, up ou combinações aninhadas.",
+      "additionalProperties": { "$ref": "#/definitions/key-binding" }
+    },
+    "keys": {
+      "type": "object",
+      "properties": {
+        "normal": { "$ref": "#/definitions/key-map" },
+        "insert": { "$ref": "#/definitions/key-map" },
+        "select": { "$ref": "#/definitions/key-map" }
+      },
+      "additionalProperties": false,
+      "description": "Mapas remapeáveis do Helix. O modo command não é remapeável."
+    },
+    "editor": {
+      "type": "object",
+      "properties": {
+        "scrolloff": { "type": "integer", "minimum": 0, "description": "Linhas de margem durante a rolagem." },
+        "mouse": { "type": "boolean" },
+        "mouse-yank-register": { "type": "string" },
+        "middle-click-paste": { "type": "boolean" },
+        "default-yank-register": { "type": "string", "minLength": 1, "maxLength": 1 },
+        "scroll-lines": { "type": "integer", "minimum": 1 },
+        "shell": { "$ref": "#/definitions/string-array" },
+        "line-number": { "type": "string", "enum": ["absolute", "relative"] },
+        "cursorline": { "type": "boolean" },
+        "cursorcolumn": { "type": "boolean" },
+        "continue-comments": { "type": "boolean" },
+        "gutters": { "$ref": "#/definitions/gutters-setting" },
+        "auto-completion": { "type": "boolean" },
+        "path-completion": { "type": "boolean" },
+        "auto-format": { "type": "boolean" },
+        "idle-timeout": { "type": "integer", "minimum": 0 },
+        "completion-timeout": { "type": "integer", "minimum": 0 },
+        "preview-completion-insert": { "type": "boolean" },
+        "completion-trigger-len": { "type": "integer", "minimum": 0 },
+        "completion-replace": { "type": "boolean" },
+        "auto-info": { "type": "boolean" },
+        "true-color": { "type": "boolean" },
+        "undercurl": { "type": "boolean" },
+        "rulers": { "type": "array", "items": { "type": "integer", "minimum": 0 } },
+        "bufferline": { "type": "string", "enum": ["always", "never", "multiple"] },
+        "color-modes": { "type": "boolean" },
+        "text-width": { "type": "integer", "minimum": 0 },
+        "workspace-lsp-roots": { "$ref": "#/definitions/string-array" },
+        "default-line-ending": { "type": "string", "enum": ["native", "lf", "crlf", "ff", "cr", "nel"] },
+        "insert-final-newline": { "type": "boolean" },
+        "atomic-save": { "type": "boolean" },
+        "trim-final-newlines": { "type": "boolean" },
+        "trim-trailing-whitespace": { "type": "boolean" },
+        "popup-border": { "type": "string", "enum": ["popup", "menu", "all", "none"] },
+        "indent-heuristic": { "type": "string", "enum": ["simple", "tree-sitter", "hybrid"] },
+        "jump-label-alphabet": { "type": "string", "minLength": 1 },
+        "end-of-line-diagnostics": { "$ref": "#/definitions/severity-or-disable" },
+        "clipboard-provider": { "$ref": "#/definitions/clipboard-provider" },
+        "editor-config": { "type": "boolean" },
+        "rainbow-brackets": { "type": "boolean" },
+        "kitty-keyboard-protocol": { "type": "string", "enum": ["enabled", "disabled", "auto"] },
+        "statusline": { "$ref": "#/definitions/statusline" },
+        "lsp": { "$ref": "#/definitions/lsp" },
+        "cursor-shape": { "$ref": "#/definitions/cursor-shape" },
+        "file-picker": { "$ref": "#/definitions/file-picker" },
+        "file-explorer": { "$ref": "#/definitions/file-explorer" },
+        "buffer-picker": { "$ref": "#/definitions/buffer-picker" },
+        "auto-pairs": { "$ref": "#/definitions/auto-pairs" },
+        "auto-save": { "$ref": "#/definitions/auto-save" },
+        "search": { "$ref": "#/definitions/search" },
+        "whitespace": { "$ref": "#/definitions/whitespace" },
+        "indent-guides": { "$ref": "#/definitions/indent-guides" },
+        "soft-wrap": { "$ref": "#/definitions/soft-wrap" },
+        "smart-tab": { "$ref": "#/definitions/smart-tab" },
+        "inline-diagnostics": { "$ref": "#/definitions/inline-diagnostics" },
+        "word-completion": { "$ref": "#/definitions/word-completion" },
+        "workspace-trust": { "$ref": "#/definitions/workspace-trust" }
+      },
+      "additionalProperties": false,
+      "description": "Opções globais do editor e suas subseções oficiais."
+    },
+    "clipboard-command": {
+      "type": "object",
+      "properties": {
+        "command": { "type": "string" },
+        "args": { "$ref": "#/definitions/string-array" }
+      },
+      "required": ["command"],
+      "additionalProperties": false
+    },
+    "clipboard-provider": {
+      "description": "Provedor embutido ou configuração customizada de clipboard.",
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": ["pasteboard", "wayland", "x-clip", "x-sel", "win32-yank", "termux", "tmux", "windows", "termcode", "none"]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "custom": {
+              "type": "object",
+              "properties": {
+                "yank": { "$ref": "#/definitions/clipboard-command" },
+                "paste": { "$ref": "#/definitions/clipboard-command" },
+                "primary-yank": { "$ref": "#/definitions/clipboard-command" },
+                "primary-paste": { "$ref": "#/definitions/clipboard-command" }
+              },
+              "required": ["yank", "paste"],
+              "additionalProperties": false
+            }
+          },
+          "required": ["custom"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "statusline": {
+      "type": "object",
+      "properties": {
+        "left": { "$ref": "#/definitions/statusline-elements" },
+        "center": { "$ref": "#/definitions/statusline-elements" },
+        "right": { "$ref": "#/definitions/statusline-elements" },
+        "separator": { "type": "string" },
+        "mode": {
+          "type": "object",
+          "properties": {
+            "normal": { "type": "string" },
+            "insert": { "type": "string" },
+            "select": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "diagnostics": { "$ref": "#/definitions/severity-list" },
+        "workspace-diagnostics": { "$ref": "#/definitions/severity-list" }
+      },
+      "additionalProperties": false
+    },
+    "statusline-elements": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["mode", "spinner", "file-name", "file-absolute-path", "file-base-name", "current-working-directory", "file-modification-indicator", "file-encoding", "file-line-ending", "file-indent-style", "read-only-indicator", "total-line-numbers", "file-type", "diagnostics", "workspace-diagnostics", "selections", "primary-selection-length", "position", "position-percentage", "separator", "spacer", "version-control", "register", "code-action-hint"]
+      }
+    },
+    "severity-list": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/severity" }
+    },
+    "lsp": {
+      "type": "object",
+      "properties": {
+        "enable": { "type": "boolean" },
+        "display-messages": { "type": "boolean" },
+        "display-progress-messages": { "type": "boolean" },
+        "auto-signature-help": { "type": "boolean" },
+        "auto-document-highlight": { "type": "boolean" },
+        "display-inlay-hints": { "type": "boolean" },
+        "inlay-hints-length-limit": { "type": "integer", "minimum": 1 },
+        "display-color-swatches": { "type": "boolean" },
+        "display-signature-help-docs": { "type": "boolean" },
+        "snippets": { "type": "boolean" },
+        "goto-reference-include-declaration": { "type": "boolean" }
+      },
+      "additionalProperties": false,
+      "description": "Comportamento global do LSP, incluindo completion, assinatura e inlay hints."
+    },
+    "cursor-shape": {
+      "type": "object",
+      "properties": {
+        "normal": { "$ref": "#/definitions/cursor-shape-value" },
+        "insert": { "$ref": "#/definitions/cursor-shape-value" },
+        "select": { "$ref": "#/definitions/cursor-shape-value" }
+      },
+      "additionalProperties": false
+    },
+    "cursor-shape-value": {
+      "type": "string",
+      "enum": ["block", "bar", "underline", "hidden"]
+    },
+    "file-picker": {
+      "type": "object",
+      "properties": {
+        "hidden": { "type": "boolean" },
+        "follow-symlinks": { "type": "boolean" },
+        "deduplicate-links": { "type": "boolean" },
+        "parents": { "type": "boolean" },
+        "ignore": { "type": "boolean" },
+        "git-ignore": { "type": "boolean" },
+        "git-global": { "type": "boolean" },
+        "git-exclude": { "type": "boolean" },
+        "max-depth": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "file-explorer": {
+      "type": "object",
+      "properties": {
+        "hidden": { "type": "boolean" },
+        "follow-symlinks": { "type": "boolean" },
+        "parents": { "type": "boolean" },
+        "ignore": { "type": "boolean" },
+        "git-ignore": { "type": "boolean" },
+        "git-global": { "type": "boolean" },
+        "git-exclude": { "type": "boolean" },
+        "flatten-dirs": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "buffer-picker": {
+      "type": "object",
+      "properties": {
+        "start-position": { "type": "string", "enum": ["current", "previous"] }
+      },
+      "additionalProperties": false
+    },
+    "auto-pairs": {
+      "description": "false desativa auto-pairs; uma tabela mapeia cada caractere de abertura para seu fechamento.",
+      "anyOf": [
+        { "type": "boolean" },
+        { "type": "object", "additionalProperties": { "type": "string", "minLength": 1, "maxLength": 1 } }
+      ]
+    },
+    "auto-save": {
+      "type": "object",
+      "properties": {
+        "focus-lost": { "type": "boolean" },
+        "after-delay": {
+          "type": "object",
+          "properties": {
+            "enable": { "type": "boolean" },
+            "timeout": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "search": {
+      "type": "object",
+      "properties": {
+        "smart-case": { "type": "boolean" },
+        "wrap-around": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "whitespace": {
+      "type": "object",
+      "properties": {
+        "render": {
+          "anyOf": [
+            { "type": "string", "enum": ["all", "none"] },
+            {
+              "type": "object",
+              "properties": {
+                "space": { "type": "string", "enum": ["all", "none"] },
+                "nbsp": { "type": "string", "enum": ["all", "none"] },
+                "nnbsp": { "type": "string", "enum": ["all", "none"] },
+                "tab": { "type": "string", "enum": ["all", "none"] },
+                "newline": { "type": "string", "enum": ["all", "none"] }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "characters": {
+          "type": "object",
+          "properties": {
+            "tab": { "type": "string" },
+            "space": { "type": "string" },
+            "nbsp": { "type": "string" },
+            "nnbsp": { "type": "string" },
+            "newline": { "type": "string" },
+            "tabpad": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "indent-guides": {
+      "type": "object",
+      "properties": {
+        "render": { "type": "boolean" },
+        "character": { "type": "string", "minLength": 1 },
+        "skip-levels": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "gutters-setting": {
+      "description": "Lista simples de gutters ou tabela [editor.gutters] com layout e opções por gutter.",
+      "anyOf": [
+        {
+          "type": "array",
+          "items": { "type": "string", "enum": ["diagnostics", "diff", "line-numbers", "spacer", "code-action-hint"] }
+        },
+        {
+          "type": "object",
+      "properties": {
+        "layout": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["diagnostics", "diff", "line-numbers", "spacer", "code-action-hint"] }
+        },
+        "line-numbers": {
+          "type": "object",
+          "properties": { "min-width": { "type": "integer", "minimum": 0 } },
+          "additionalProperties": false
+        },
+        "diagnostics": { "type": "object", "additionalProperties": false },
+        "diff": { "type": "object", "additionalProperties": false },
+        "spacer": { "type": "object", "additionalProperties": false },
+        "code-action-hint": { "type": "object", "additionalProperties": false }
+      },
+      "additionalProperties": false
+        }
+      ]
+    },
+    "soft-wrap": {
+      "type": "object",
+      "properties": {
+        "enable": { "type": "boolean" },
+        "max-wrap": { "type": "integer", "minimum": 0 },
+        "max-indent-retain": { "type": "integer", "minimum": 0 },
+        "wrap-indicator": { "type": "string" },
+        "wrap-at-text-width": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "smart-tab": {
+      "type": "object",
+      "properties": {
+        "enable": { "type": "boolean" },
+        "supersede-menu": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "inline-diagnostics": {
+      "type": "object",
+      "properties": {
+        "cursor-line": { "$ref": "#/definitions/severity-or-disable" },
+        "other-lines": { "$ref": "#/definitions/severity-or-disable" },
+        "prefix-len": { "type": "integer", "minimum": 0 },
+        "max-wrap": { "type": "integer", "minimum": 0 },
+        "max-diagnostics": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "word-completion": {
+      "type": "object",
+      "properties": {
+        "enable": { "type": "boolean" },
+        "trigger-length": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "workspace-trust": {
+      "type": "object",
+      "properties": {
+        "level": { "type": "string", "enum": ["none", "servers", "insecure"] },
+        "prompt": { "type": "boolean" },
+        "trusted": { "$ref": "#/definitions/string-array" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

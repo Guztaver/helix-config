@@ -1,0 +1,37 @@
+#:schema ./schemas/helix-config.schema.json 
+theme = "ashen"
+
+[editor]
+auto-completion = true
+completion-trigger-len = 1
+completion-timeout = 5
+auto-info = true
+preview-completion-insert = true
+default-yank-register = "+"
+line-number = "relative"
+cursorline = true
+
+[editor.lsp]
+enable = true
+auto-signature-help = true
+display-signature-help-docs = true
+display-inlay-hints = true
+snippets = true
+
+[keys.normal]
+p = "paste_after"
+P = "replace_with_yanked"
+G = "goto_last_line"
+"$" = "goto_line_end"
+"_" = "goto_line_start"
+
+[keys.normal.g]
+l = "shell_keep_pipe"
+
+[keys.select]
+G = "goto_last_line"
+"$" = "goto_line_end"
+"_" = "goto_line_start"
+
+[keys.select.g]
+l = "shell_keep_pipe"

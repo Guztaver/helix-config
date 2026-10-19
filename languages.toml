@@ -1,0 +1,19 @@
+#:schema ./schemas/helix-languages.schema.json
+
+[[language]]
+name = "java"
+language-servers = ["jdtls"]
+auto-format = true
+indent = { tab-width = 4, unit = "    " }
+
+[language-server.jdtls]
+timeout = 120
+command = "C:\\tools\\bin\\jdtls.cmd"
+
+[language-server.jdtls.config.java.inlayHints]
+parameterNames.enabled = "all"
+
+[[language]]
+name = "toml"
+language-servers = ["taplo"]
+auto-format = true
